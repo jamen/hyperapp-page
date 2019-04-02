@@ -1,3 +1,3 @@
-# @jamen/hyperapp-page
+# hyperapp-page
 
 Routing, prerendering, and metadata for Hyperapp.

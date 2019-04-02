@@ -2,7 +2,7 @@ const { h } = require('hyperapp')
 const { renderToStream } = require('@hyperapp/render')
 
 module.exports = function html (options) {
-    const { head, page, state, css, js } = options
+    let { head, page, state, css, js } = options
 
     const siteHead = head(state)
     const pageHead = page.head(state)
@@ -21,20 +21,22 @@ module.exports = function html (options) {
                     pageMeta.attributes.rel === siteMeta.attributes.rel
                 )
             ) {
-                Object.assign(pageHead.attributes, pageMeta.attributes)
+                Object.assign(pageMeta.attributes, pageMeta.attributes)
             } else if (pageMeta.nodeName === 'title' && pageHead.nodeName === 'title') {
                 pageHead.children[0] = pageMeta.children[0]
-                Object.assign(pageHead.attributes, pageMeta.attributes)
-            } else {
-                pageHead.children.push(siteMeta)
+                Object.assign(pageMeta.attributes, pageMeta.attributes)
             }
+        }
+
+        if (pageHead.children.indexOf(siteMeta) === -1) {
+            pageHead.children.push(siteMeta)
         }
     }
 
     if (!css) css = 'app.css'
     if (!js) js = 'app.js'
 
-    pageMeta.children.push(h('link', { rel: 'stylesheet', href: css }))
+    pageHead.children.push(h('link', { rel: 'stylesheet', href: css }))
 
     const doc = h('html', null, [
         pageHead,

@@ -1,5 +1,5 @@
 {
-    "name": "@jamen/hyperapp-page",
+    "name": "hyperapp-page",
     "author": "Jamen Marz <me@jamenmarz.com>",
     "main": "src/hyperapp-page.js",
     "bin": "src/hyperapp-page-cli.js",
