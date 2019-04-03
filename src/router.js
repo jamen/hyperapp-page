@@ -1,5 +1,7 @@
+export const routes = {}
+
 export const RoutePage = () => state =>
-    state.routes[state.page] ? state.routes[state.page].main : pages.lost.main
+    state.routes[state.page] ? state.routes[state.page].main : state.routes[false].main
 
 export const route = data => state => {
     if (data) {
@@ -11,7 +13,7 @@ export const route = data => state => {
     const search = location.search
     const query = {}
     const route = state.routes[page]
-    const head = route ? route.head(state) : pages.lost.head(state)
+    const head = route ? route.head(state) : state.routes[false].head(state)
 
     if (head) {
         for (const el of document.head.childNodes) {
@@ -48,14 +50,22 @@ export const route = data => state => {
     return { page, query }
 }
 
-export const routeInit = main => {
-    main.route()
+export const routeInit = pages => (_state, actions) => {
+    const routes = {}
+
+    for (const pageName in pages) {
+        const page = pages[pageName]
+        routes[page.route] = page
+    }
+
+    actions.update({ routes })
+    actions.route()
 
     window.addEventListener('click', event => {
         const target = event.target
         if (target.nodeName === 'A' && !/^([a-z\d]+:)?\/\//i.test(target.getAttribute('href'))) {
             event.preventDefault()
-            main.route(target.href)
+            actions.route(target.href)
         }
     })
 }
