@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-
-const { readFileSync } = require('fs')
 const parseArgs = require('mri')
+const { resolve } = require('path')
 const { rollup } = require('rollup')
 const babel = require('rollup-plugin-babel')
 const nodeResolve = require('rollup-plugin-node-resolve')
@@ -17,16 +16,22 @@ async function main () {
         }
     )
 
-    if (!options.head) {
-        throw new Error('Must provide a head file.')
-    }
+    const input = options.input || options._[0] || resolve(process.cwd(), 'src/html.js')
 
-    if (!options.page) {
-        throw new Error('Must provide a page file.')
-    }
+    // IMPORTANT
+    //
+    // Improve this process by:
+    //   1. Importing ES6 module if the Node.js version supports it. This skips the entire bundle
+    //      process, because you recieve `site` variable, and you can use the `html({ site })`
+    //      function seen below below.
+    //   2. Compiling, hashing, and caching the ES6 modules to common.js using rollup, making them
+    //      more suitable for servers.
 
-    const pageBundle = await rollup({
-        input: options.page,
+    // The IIFE method below is easier and hackier, but not safe. I'm only prerendering from a
+    // command for now so its okay.
+
+    const bundle = await rollup({
+        input,
         plugins: [
             nodeResolve(),
             babel({
@@ -39,47 +44,15 @@ async function main () {
         ]
     })
 
-    const { output: [ { code: pageCode }] } = await pageBundle.generate({
-        format: 'iife',
-        name: 'interm'
+    const { output: [ output ] } = await bundle.generate({ format: 'iife', name: 'site' })
+
+    const site = new Function(output.code + '\n\nreturn site')()
+
+    const htmlStream = await html({
+        site,
+        css: options.css,
+        js: options.js
     })
-
-    let page = new Function(pageCode + '\n\nreturn interm')()
-
-    if (typeof page === 'object') {
-        const [ pageName ] = Object.keys(page)
-        page = page[pageName]
-    }
-
-    const headBundle = await rollup({
-        input: options.head,
-        plugins: [
-            nodeResolve(),
-            babel({
-                exclude: 'node_modules/**',
-                babelrc: false,
-                plugins: [
-                    ['@babel/plugin-transform-react-jsx', { pragma: 'h' }]
-                ]
-            })
-        ]
-    })
-
-    const { output: [ { code: headCode } ] } = await headBundle.generate({
-        format: 'iife',
-        name: 'interm'
-    })
-
-    let head = new Function(headCode + '\n\nreturn interm')()
-
-    if (typeof page === 'object') {
-        const [ headName ] = Object.keys(head)
-        head = head[headName]
-    }
-
-    const state = options.state ? JSON.parse(readFileSync(options.state)) : {}
-
-    const htmlStream = await html({ page, head, state })
 
     htmlStream.pipe(process.stdout)
 }

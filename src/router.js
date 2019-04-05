@@ -1,7 +1,5 @@
-export const routes = {}
-
 export const RoutePage = () => state =>
-    state.routes[state.page] ? state.routes[state.page].main : state.routes[false].main
+    state.routes[state.page] ? state.routes[state.page].view : state.routes[false].view
 
 export const route = data => state => {
     if (data) {
@@ -67,5 +65,9 @@ export const routeInit = pages => (_state, actions) => {
             event.preventDefault()
             actions.route(target.href)
         }
+    })
+
+    window.addEventListener('popstate', () => {
+        actions.route()
     })
 }
