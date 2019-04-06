@@ -39,7 +39,7 @@ export const route = data => state => {
     if (search) {
         const parts = search.slice(1).split('&')
 
-        for (let i = 0; i < query.length; i++) {
+        for (let i = 0; i < parts.length; i++) {
             const pair = parts[i].split('=')
             query[pair[0]] = pair[1]
         }
