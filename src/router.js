@@ -1,5 +1,16 @@
+import { h } from 'hyperapp'
+
 export const RoutePage = () => state =>
     state.routes[state.page] ? state.routes[state.page].view : state.routes[false].view
+
+export const Link = data =>
+    h('a', {
+        href: data.href,
+        onclick (event) {
+            event.preventDefault()
+            actions.route(event.target.href)
+        }
+    })
 
 export const route = data => state => {
     if (data) {
@@ -56,18 +67,9 @@ export const routeInit = pages => (_state, actions) => {
         routes[page.route] = page
     }
 
-    actions.update({ routes })
-    actions.route()
+    window.addEventListener('popstate', () => actions.route())
 
-    window.addEventListener('click', event => {
-        const target = event.target
-        if (target.nodeName === 'A' && !/^([a-z\d]+:)?\/\//i.test(target.getAttribute('href'))) {
-            event.preventDefault()
-            actions.route(target.href)
-        }
-    })
+    const { page, query } = route()({ routes })
 
-    window.addEventListener('popstate', () => {
-        actions.route()
-    })
+    return { routes, page, query }
 }
