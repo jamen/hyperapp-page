@@ -5,7 +5,7 @@ export const RoutePage = () => state =>
 
 export const Link = data =>
     h('a', {
-        href: data.href,
+        ...data,
         onclick (event) {
             event.preventDefault()
             actions.route(event.target.href)
