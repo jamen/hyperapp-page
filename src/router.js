@@ -3,7 +3,7 @@ import { h } from 'hyperapp'
 export const RoutePage = () => state =>
     state.routes[state.page] ? state.routes[state.page].view : state.routes[false].view
 
-export const Link = data =>
+export const Link = data => (_state, actions) =>
     h('a', {
         ...data,
         onclick (event) {
@@ -25,26 +25,7 @@ export const route = data => state => {
     const head = route ? route.head(state) : state.routes[false].head(state)
 
     if (head) {
-        for (const el of document.head.childNodes) {
-            for (const node of head.children) {
-                const attr = node.attributes
-                if (
-                    node.nodeName === el.nodeName.toLowerCase() &&
-                    (
-                        attr.name === el.getAttribute('name') ||
-                        attr.property === el.getAttribute('property') ||
-                        attr.itemprop === el.getAttribute('itemprop') ||
-                        attr['http-equiv'] === el.getAttribute('http-equiv') ||
-                        attr.rel === el.getAttribute('rel')
-                    )
-                ) {
-                    Object.assign(el, attr)
-                } else if (el.tagName === 'TITLE' && node.nodeName === 'title') {
-                    document.title = node.children[0]
-                    Object.assign(el, attr)
-                }
-            }
-        }
+        patchHead(head)
     }
 
     if (search) {
@@ -72,4 +53,27 @@ export const routeInit = pages => (_state, actions) => {
     const { page, query } = route()({ routes })
 
     return { routes, page, query }
+}
+
+export const patchHead = head => {
+    for (const el of document.head.childNodes) {
+        for (const node of head.children) {
+            const attr = node.attributes
+            if (
+                node.nodeName === el.nodeName.toLowerCase() &&
+                (
+                    attr.name === el.getAttribute('name') ||
+                    attr.property === el.getAttribute('property') ||
+                    attr.itemprop === el.getAttribute('itemprop') ||
+                    attr['http-equiv'] === el.getAttribute('http-equiv') ||
+                    attr.rel === el.getAttribute('rel')
+                )
+            ) {
+                Object.assign(el, attr)
+            } else if (el.tagName === 'TITLE' && node.nodeName === 'title') {
+                document.title = node.children[0]
+                Object.assign(el, attr)
+            }
+        }
+    }
 }
