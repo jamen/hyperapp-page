@@ -13,21 +13,27 @@ export const Link = data => (_state, actions) =>
     })
 
 export const route = data => state => {
-    if (data) {
+    let page
+
+    // Route page (hash routing for local sites, Electron, or history router unsupported)
+    if (!window.history || location.origin === 'file://') {
+        page = location.hash = location.hash.slice(1) || '/'
+    } else {
+        page = location.pathname
         history.pushState(null, '', data)
         window.scrollTo(0, 0)
     }
 
-    const page = location.pathname
     const search = location.search
     const query = {}
-    const route = state.routes[page]
-    const head = route ? route.head(state) : state.routes[false].head(state)
+    const view = state.routes[page]
 
-    if (head) {
-        patchHead(head)
+    // 404 page
+    if (view === null || view === undefined) {
+        return route(false)
     }
 
+    // Decode search params
     if (search) {
         const parts = search.slice(1).split('&')
 
@@ -35,6 +41,13 @@ export const route = data => state => {
             const pair = parts[i].split('=')
             query[pair[0]] = pair[1]
         }
+    }
+
+    // Patch head
+    const head = view.head && view.head(state)
+
+    if (head) {
+        patchHead(head)
     }
 
     return { page, query }
