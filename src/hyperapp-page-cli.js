@@ -46,12 +46,15 @@ async function main () {
 
     const { output: [ output ] } = await bundle.generate({ format: 'iife', name: 'site' })
 
-    const site = new Function(output.code + '\n\nreturn site')()
+    const { state, head, view, pages } = new Function(output.code + '\n\nreturn site')()
 
     const htmlStream = await html({
-        site,
+        js: options.js,
         css: options.css,
-        js: options.js
+        state,
+        head,
+        view,
+        pages
     })
 
     htmlStream.pipe(process.stdout)

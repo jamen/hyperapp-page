@@ -1,20 +1,18 @@
 const { h } = require('hyperapp')
 const { renderToStream } = require('@hyperapp/render')
 
-module.exports = function html (options) {
-    let { site, css, js } = options
+module.exports = function html (config) {
+    let { state, head, view, pages, css, js } = config
 
+    if (!state) state = {}
     if (!css) css = 'app.css'
     if (!js) js = 'app.js'
 
-    const actions = site.actions
-    const state = site.state
     let routes = state.routes
 
     // Add routes to state (like calling main.routeInit on server)
-    if (routes == null) {
+    if (pages && !routes) {
         routes = state.routes = {}
-        const pages = site.pages
 
         for (const pageName in pages) {
             const page = pages[pageName]
@@ -23,9 +21,9 @@ module.exports = function html (options) {
     }
 
     // Create page head
-    const head = site.head(state, actions)
+    const siteHead = head ? head(state) : h('head')
 
-    head.children.push(
+    siteHead.children.push(
         h('link', { rel: 'stylesheet', href: css })
     )
 
@@ -33,10 +31,10 @@ module.exports = function html (options) {
         const page = routes[state.page]
         const pageHead = page.head(state)
 
-        Object.assign(head.attributes, pageHead.attributes)
+        Object.assign(siteHead.attributes, pageHead.attributes)
 
         for (const pageMeta of pageHead.children) {
-            for (const meta of head.children) {
+            for (const meta of siteHead.children) {
                 if (
                     meta.nodeName === pageMeta.nodeName &&
                     (
@@ -53,20 +51,20 @@ module.exports = function html (options) {
                     Object.assign(meta.attributes, pageMeta.attributes)
                 }
             }
-            if (head.children.indexOf(pageMeta) === -1) {
-                head.children.push(pageMeta)
+            if (siteHead.children.indexOf(pageMeta) === -1) {
+                siteHead.children.push(pageMeta)
             }
         }
     }
 
     const doc =
         h('html', null, [
-            head,
+            siteHead,
             h('body', null, [
-                h(site.view),
+                h(view),
                 h('script', { src: js })
             ])
         ])
 
-    return renderToStream(doc, state, actions)
+    return renderToStream(doc, state)
 }
