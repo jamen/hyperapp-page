@@ -1,19 +1,10 @@
 {
-    "name": "hyperapp-page",
+    "name": "@finepoint/hyperapp-page",
     "author": "Jamen Marz <me@jamenmarz.com>",
     "main": "src/hyperapp-page.js",
-    "bin": "src/hyperapp-page-cli.js",
     "version": "0.1.0",
-    "repository": "https://github.com/jamen/hyperapp-page",
+    "repository": "https://github.com/finepoint-dev/hyperapp-page",
     "dependencies": {
-        "@babel/core": "7.4.0",
-        "@babel/plugin-transform-react-jsx": "7.3.0",
-        "@hyperapp/render": "2.1.0",
-        "hyperapp": "1.2.9",
-        "mri": "1.1.4",
-        "pg": "7.9.0",
-        "rollup": "1.8.0",
-        "rollup-plugin-babel": "4.3.2",
-        "rollup-plugin-node-resolve": "4.0.1"
+        "hyperapp": "1.2.9"
     }
 }

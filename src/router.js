@@ -1,21 +1,22 @@
 import { h } from 'hyperapp'
 
-export const RoutePage = () => state =>
-    state.routes[state.page] ? state.routes[state.page].view : state.routes[false].view
+export const RoutePage = data => state => {
+    const page = data.pages[state.page] || data.lost
+    return page ? page.view : data.lost
+}
 
-export const Link = data => (_state, actions) =>
+export const Link = (data, children) => (_state, actions) =>
     h('a', {
         ...data,
         onclick (event) {
             event.preventDefault()
             actions.route(event.target.href)
         }
-    })
+    }, children)
 
 export const route = data => state => {
-    let page
-
     // Hash and history routing
+    let page
     if (!window.history) {
         location.hash = data || ''
         page = location.hash.slice(1) || '/'
@@ -27,14 +28,10 @@ export const route = data => state => {
         page = location.pathname
     }
 
-    const search = location.search
-    const query = {}
-    const view = state.routes[page]
-
     // Decode search params
-    if (search) {
-        const parts = search.slice(1).split('&')
-
+    const query = {}
+    if (location.search) {
+        const parts = location.search.search.slice(1).split('&')
         for (let i = 0; i < parts.length; i++) {
             const pair = parts[i].split('=')
             query[pair[0]] = pair[1]
@@ -42,6 +39,7 @@ export const route = data => state => {
     }
 
     // Patch head
+    const view = state.routes[page]
     if (view && view.head) {
         patchHead(view.head(state))
     }
@@ -70,22 +68,21 @@ export const routeInit = pages => (_state, actions) => {
 export const patchHead = head => {
     for (const el of document.head.childNodes) {
         for (const node of head.children) {
-            const attr = node.attributes
-            if (
-                node.nodeName === el.nodeName.toLowerCase() &&
-                (
-                    attr.name === el.getAttribute('name') ||
-                    attr.property === el.getAttribute('property') ||
-                    attr.itemprop === el.getAttribute('itemprop') ||
-                    attr['http-equiv'] === el.getAttribute('http-equiv') ||
-                    attr.rel === el.getAttribute('rel')
-                )
-            ) {
-                Object.assign(el, attr)
-            } else if (el.tagName === 'TITLE' && node.nodeName === 'title') {
+            if (testKeys(node, el)) {
+                Object.assign(el, node.attributes)
+            } else if (node.nodeName === 'title' && el.nodeName === 'TITLE') {
                 document.title = node.children[0]
-                Object.assign(el, attr)
             }
+        }
+    }
+}
+
+const headKeys = [ 'name', 'property', 'itemprop', 'http-equiv', 'rel' ]
+
+const testKeys = (node1, node2) => {
+    for (const key of headKeys) {
+        if (node1[key] && node2[key] && node1[key] === node2[key]) {
+            return true
         }
     }
 }
