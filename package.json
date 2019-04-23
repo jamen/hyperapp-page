@@ -1,10 +1,11 @@
 {
     "name": "@finepoint/hyperapp-page",
     "author": "Jamen Marz <me@jamenmarz.com>",
-    "main": "src/hyperapp-page.js",
+    "main": "src/page.js",
     "version": "0.1.0",
     "repository": "https://github.com/finepoint-dev/hyperapp-page",
     "dependencies": {
+        "@finepoint/hyperapp-head": "0.1.0",
         "hyperapp": "1.2.9"
     }
 }
