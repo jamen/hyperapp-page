@@ -2,7 +2,7 @@
     "name": "@finepoint/hyperapp-page",
     "author": "Jamen Marz <me@jamenmarz.com>",
     "main": "src/page.js",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "repository": "https://github.com/finepoint-dev/hyperapp-page",
     "dependencies": {
         "@finepoint/hyperapp-head": "0.2.0",
