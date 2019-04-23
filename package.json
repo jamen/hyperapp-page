@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "repository": "https://github.com/finepoint-dev/hyperapp-page",
     "dependencies": {
-        "@finepoint/hyperapp-head": "0.1.0",
+        "@finepoint/hyperapp-head": "0.2.0",
         "hyperapp": "1.2.9"
     }
 }
